@@ -162,7 +162,7 @@ if uploaded_file is not None:
                 st.write("- Frecuencia de medición: Según configuración")
                 st.write("- Ubicación: Campus universitario")
         
-        with tab5:
+       with tab5:
             st.subheader("📉 Análisis de Correlación")
             
             # Análisis de correlación entre temperatura y humedad
@@ -187,3 +187,14 @@ if uploaded_file is not None:
                 ax.hist(df1['temperatura'], bins=30, color='orange', edgecolor='black')
                 ax.set_title('Distribución de Temperatura')
                 ax.set_xlabel('Temperatura (°C)')
+                ax.set_ylabel('Frecuencia')
+                st.pyplot(fig)
+            
+            with col2:
+                fig, ax = plt.subplots()
+                ax.hist(df1['humedad'], bins=30, color='green', edgecolor='black')
+                ax.set_title('Distribución de Humedad')
+                ax.set_xlabel('Humedad (%)')
+                ax.set_ylabel('Frecuencia')
+                st.pyplot(fig)
+
