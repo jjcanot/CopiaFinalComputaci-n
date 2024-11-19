@@ -162,7 +162,7 @@ if uploaded_file is not None:
                 st.write("- Frecuencia de medición: Según configuración")
                 st.write("- Ubicación: Campus universitario")
         
-       with tab5:
+        with tab5:
             st.subheader("📉 Análisis de Correlación")
             
             # Análisis de correlación entre temperatura y humedad
