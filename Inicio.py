@@ -24,7 +24,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Title and description
-st.title('📊 Análisis de datos de Sensores en Mi Ciudad')
+st.title('📊 SENSOAMIGOS')
 st.markdown("""
     Esta aplicación permite analizar datos de temperatura y humedad
     recolectados por sensores de temperatura y humedad en diferentes puntos de la ciudad.
