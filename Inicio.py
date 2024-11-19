@@ -1,83 +1,64 @@
 import pandas as pd
 import streamlit as st
-from PIL import Image
 import numpy as np
 from datetime import datetime
+import matplotlib.pyplot as plt
+import seaborn as sns
 
-# Page configuration
-st.set_page_config(
-    page_title="Análisis de Sensores - Mi Ciudad",
-    page_icon="📊",
-    layout="wide"
-)
+# Configuración de la página
+st.set_page_config(page_title="Análisis de Sensores - Mi Ciudad", page_icon="📊", layout="wide")
 
-# Custom CSS
+# CSS personalizado
 st.markdown("""
     <style>
-    .main {
-        padding: 2rem;
-    }
-    .stAlert {
-        margin-top: 1rem;
-    }
+    .main { padding: 2rem; }
+    .stAlert { margin-top: 1rem; }
     </style>
 """, unsafe_allow_html=True)
 
-# Title and description
-st.title('📊 Análisis de datos de Sensores en Mi Ciudad')
+# Título y descripción
+st.title('📊 Análisis de Datos de Sensores en Mi Ciudad')
 st.markdown("""
     Esta aplicación permite analizar datos de temperatura y humedad
-    recolectados por sensores de temperatura y humedad en diferentes puntos de la ciudad.
+    recolectados por sensores en diferentes puntos de la ciudad.
 """)
 
-# Create map data for EAFIT
-eafit_location = pd.DataFrame({
-    'lat': [6.2006],
-    'lon': [-75.5783],
-    'location': ['Universidad EAFIT']
-})
-
-# Display map
-st.subheader("📍 Ubicación de los Sensores - Universidad EAFIT")
-st.map(eafit_location, zoom=15)
-
-# File uploader
+# Cargar archivo CSV
 uploaded_file = st.file_uploader('Seleccione archivo CSV', type=['csv'])
+
+def cargar_datos(uploaded_file):
+    """Función para cargar y procesar los datos del archivo CSV."""
+    df = pd.read_csv(uploaded_file)
+    
+    # Renombrar columnas para simplificar
+    column_mapping = {
+        'temperatura {device="ESP32", name="Sensor 1"}': 'temperatura',
+        'humedad {device="ESP32", name="Sensor 1"}': 'humedad'
+    }
+    df = df.rename(columns=column_mapping)
+    
+    # Convertir la columna 'Time' a formato datetime y establecerla como índice
+    df['Time'] = pd.to_datetime(df['Time'])
+    df = df.set_index('Time')
+    
+    return df
 
 if uploaded_file is not None:
     try:
-        # Load and process data
-        df1 = pd.read_csv(uploaded_file)
+        df1 = cargar_datos(uploaded_file)
         
-        # Renombrar columnas para simplificar
-        column_mapping = {
-            'temperatura {device="ESP32", name="Sensor 1"}': 'temperatura',
-            'humedad {device="ESP32", name="Sensor 1"}': 'humedad'
-        }
-        df1 = df1.rename(columns=column_mapping)
-        
-        df1['Time'] = pd.to_datetime(df1['Time'])
-        df1 = df1.set_index('Time')
-
-        # Create tabs for different analyses
-        tab1, tab2, tab3, tab4 = st.tabs(["📈 Visualización", "📊 Estadísticas", "🔍 Filtros", "🗺️ Información del Sitio"])
+        # Crear pestañas para diferentes análisis
+        tab1, tab2, tab3, tab4, tab5 = st.tabs(["📈 Visualización", "📊 Estadísticas", "🔍 Filtros", "🗺️ Información del Sitio", "📉 Análisis de Correlación"])
 
         with tab1:
             st.subheader('Visualización de Datos')
             
-            # Variable selector
-            variable = st.selectbox(
-                "Seleccione variable a visualizar",
-                ["temperatura", "humedad", "Ambas variables"]
-            )
+            # Selector de variable
+            variable = st.selectbox("Seleccione variable a visualizar", ["temperatura", "humedad", "Ambas variables"])
+            # Selector de tipo de gráfico
+            chart_type = st.selectbox("Seleccione tipo de gráfico", ["Línea", "Área", "Barra"])
             
-            # Chart type selector
-            chart_type = st.selectbox(
-                "Seleccione tipo de gráfico",
-                ["Línea", "Área", "Barra"]
-            )
-            
-            # Create plot based on selection
+            # Gráficos
             if variable == "Ambas variables":
                 st.write("### Temperatura")
                 if chart_type == "Línea":
@@ -101,21 +82,18 @@ if uploaded_file is not None:
                     st.area_chart(df1[variable])
                 else:
                     st.bar_chart(df1[variable])
-
-            # Raw data display with toggle
+            
+            # Mostrar datos crudos
             if st.checkbox('Mostrar datos crudos'):
                 st.write(df1)
 
         with tab2:
             st.subheader('Análisis Estadístico')
             
-            # Variable selector for statistics
-            stat_variable = st.radio(
-                "Seleccione variable para estadísticas",
-                ["temperatura", "humedad"]
-            )
+            # Selector de variable para estadísticas
+            stat_variable = st.radio("Seleccione variable para estadísticas", ["temperatura", "humedad"])
             
-            # Statistical summary
+            # Resumen estadístico
             stats_df = df1[stat_variable].describe()
             
             col1, col2 = st.columns(2)
@@ -124,7 +102,7 @@ if uploaded_file is not None:
                 st.dataframe(stats_df)
             
             with col2:
-                # Additional statistics
+                # Estadísticas adicionales
                 if stat_variable == "temperatura":
                     st.metric("Temperatura Promedio", f"{stats_df['mean']:.2f}°C")
                     st.metric("Temperatura Máxima", f"{stats_df['max']:.2f}°C")
@@ -137,53 +115,31 @@ if uploaded_file is not None:
         with tab3:
             st.subheader('Filtros de Datos')
             
-            # Variable selector for filtering
-            filter_variable = st.selectbox(
-                "Seleccione variable para filtrar",
-                ["temperatura", "humedad"]
-            )
-            
+            filter_variable = st.selectbox("Seleccione variable para filtrar", ["temperatura", "humedad"])
             col1, col2 = st.columns(2)
             
             with col1:
-                # Minimum value filter
-                min_val = st.slider(
-                    f'Valor mínimo de {filter_variable}',
-                    float(df1[filter_variable].min()),
-                    float(df1[filter_variable].max()),
-                    float(df1[filter_variable].mean()),
-                    key="min_val"
-                )
-                
+                # Filtro de valor mínimo
+                min_val = st.slider(f'Valor mínimo de {filter_variable}', 
+                                    float(df1[filter_variable].min()), float(df1[filter_variable].max()), 
+                                    float(df1[filter_variable].mean()), key="min_val")
                 filtrado_df_min = df1[df1[filter_variable] > min_val]
-                st.write(f"Registros con {filter_variable} superior a", 
-                        f"{min_val}{'°C' if filter_variable == 'temperatura' else '%'}:")
+                st.write(f"Registros con {filter_variable} superior a", f"{min_val}{'°C' if filter_variable == 'temperatura' else '%'}:")
                 st.dataframe(filtrado_df_min)
                 
             with col2:
-                # Maximum value filter
-                max_val = st.slider(
-                    f'Valor máximo de {filter_variable}',
-                    float(df1[filter_variable].min()),
-                    float(df1[filter_variable].max()),
-                    float(df1[filter_variable].mean()),
-                    key="max_val"
-                )
-                
+                # Filtro de valor máximo
+                max_val = st.slider(f'Valor máximo de {filter_variable}', 
+                                    float(df1[filter_variable].min()), float(df1[filter_variable].max()), 
+                                    float(df1[filter_variable].mean()), key="max_val")
                 filtrado_df_max = df1[df1[filter_variable] < max_val]
-                st.write(f"Registros con {filter_variable} inferior a",
-                        f"{max_val}{'°C' if filter_variable == 'temperatura' else '%'}:")
+                st.write(f"Registros con {filter_variable} inferior a", f"{max_val}{'°C' if filter_variable == 'temperatura' else '%'}:")
                 st.dataframe(filtrado_df_max)
 
-            # Download filtered data
+            # Descarga de datos filtrados
             if st.button('Descargar datos filtrados'):
                 csv = filtrado_df_min.to_csv().encode('utf-8')
-                st.download_button(
-                    label="Descargar CSV",
-                    data=csv,
-                    file_name='datos_filtrados.csv',
-                    mime='text/csv',
-                )
+                st.download_button(label="Descargar CSV", data=csv, file_name='datos_filtrados.csv', mime='text/csv')
 
         with tab4:
             st.subheader("Información del Sitio de Medición")
@@ -205,15 +161,29 @@ if uploaded_file is not None:
                 st.write("  * Humedad (%)")
                 st.write("- Frecuencia de medición: Según configuración")
                 st.write("- Ubicación: Campus universitario")
-
-    except Exception as e:
-        st.error(f'Error al procesar el archivo: {str(e)}')
-else:
-    st.warning('Por favor, cargue un archivo CSV para comenzar el análisis.')
-    
-# Footer
-st.markdown("""
-    ---
-    Desarrollado para el análisis de datos de sensores urbanos.
-    Ubicación: Universidad EAFIT, Medellín, Colombia
-""")
+        
+        with tab5:
+            st.subheader("📉 Análisis de Correlación")
+            
+            # Análisis de correlación entre temperatura y humedad
+            st.write("### Correlación entre Temperatura y Humedad")
+            corr = df1[['temperatura', 'humedad']].corr()
+            st.write(f"Coeficiente de Correlación: {corr.iloc[0, 1]:.2f}")
+            
+            # Gráfico de dispersión
+            fig, ax = plt.subplots()
+            ax.scatter(df1['temperatura'], df1['humedad'], c='blue', alpha=0.5)
+            ax.set_xlabel('Temperatura (°C)')
+            ax.set_ylabel('Humedad (%)')
+            ax.set_title('Gráfico de dispersión: Temperatura vs Humedad')
+            st.pyplot(fig)
+            
+            # Histogramas
+            st.write("### Histogramas de Temperatura y Humedad")
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                fig, ax = plt.subplots()
+                ax.hist(df1['temperatura'], bins=30, color='orange', edgecolor='black')
+                ax.set_title('Distribución de Temperatura')
+                ax.set_xlabel('Temperatura (°C)')
