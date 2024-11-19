@@ -197,4 +197,14 @@ if uploaded_file is not None:
                 ax.set_xlabel('Humedad (%)')
                 ax.set_ylabel('Frecuencia')
                 st.pyplot(fig)
-
+except Exception as e:
+        st.error(f'Error al procesar el archivo: {str(e)}')
+else:
+    st.warning('Por favor, cargue un archivo CSV para comenzar el análisis.')
+    
+# Footer
+st.markdown("""
+    ---
+    Desarrollado para el análisis de datos de sensores urbanos.
+    Ubicación: Universidad EAFIT, Medellín, Colombia
+""")
