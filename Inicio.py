@@ -6,7 +6,7 @@ from datetime import datetime
 
 # Page configuration
 st.set_page_config(
-    page_title="SENSOAMIGOS",
+    page_title="SENSOREAFIT",
     page_icon="📊",
     layout="wide"
 )
@@ -24,7 +24,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Title and description
-st.title('📊 SENSOAMIGOS')
+st.title('📊 SENSOREAFIT')
 st.markdown("""
     Esta aplicación permite analizar datos de temperatura y humedad
     recolectados por sensores de temperatura y humedad en diferentes puntos de la ciudad.
@@ -38,7 +38,7 @@ eafit_location = pd.DataFrame({
 })
 
 # Display map
-st.subheader("📍 SENSOAMIGOS en EAFIT")
+st.subheader("📍 SENSOREAFIT")
 st.map(eafit_location, zoom=15)
 
 # File uploader
@@ -60,7 +60,7 @@ if uploaded_file is not None:
         df1 = df1.set_index('Time')
 
         # Create tabs for different analyses
-        tab1, tab2, tab3, tab4, tab5 = st.tabs(["📈 Visualización", "📊 Estadísticas", "🔍 Filtros", "🗺️ Información del Sitio", "📉 Análisis de Correlación"])
+        tab1, tab2, tab3, tab4, tab5 = st.tabs(["📈 Visualización", "📊 Estadísticas de Datos", "🔍 Filtros", "🗺️ Ubicación"])
 
         with tab1:
             st.subheader('Visualización de Datos')
@@ -186,7 +186,7 @@ if uploaded_file is not None:
                 )
 
         with tab4:
-            st.subheader("Información del Sitio de Medición")
+            st.subheader("Ubicación")
             
             col1, col2 = st.columns(2)
             
@@ -206,42 +206,7 @@ if uploaded_file is not None:
                 st.write("- Frecuencia de medición: Según configuración")
                 st.write("- Ubicación: Campus universitario")
                 
-        with tab5:
-            st.subheader("📉 Análisis de Correlación")
-            
-            # Análisis de correlación entre temperatura y humedad
-            st.write("### Correlación entre Temperatura y Humedad")
-            corr = df1[['temperatura', 'humedad']].corr()
-            st.write(f"Coeficiente de Correlación: {corr.iloc[0, 1]:.2f}")
-            
-            # Gráfico de dispersión
-            fig, ax = plt.subplots()
-            ax.scatter(df1['temperatura'], df1['humedad'], c='blue', alpha=0.5)
-            ax.set_xlabel('Temperatura (°C)')
-            ax.set_ylabel('Humedad (%)')
-            ax.set_title('Gráfico de dispersión: Temperatura vs Humedad')
-            st.pyplot(fig)
-            
-            # Histogramas
-            st.write("### Histogramas de Temperatura y Humedad")
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                fig, ax = plt.subplots()
-                ax.hist(df1['temperatura'], bins=30, color='orange', edgecolor='black')
-                ax.set_title('Distribución de Temperatura')
-                ax.set_xlabel('Temperatura (°C)')
-                ax.set_ylabel('Frecuencia')
-                st.pyplot(fig)
-            
-            with col2:
-                fig, ax = plt.subplots()
-                ax.hist(df1['humedad'], bins=30, color='green', edgecolor='black')
-                ax.set_title('Distribución de Humedad')
-                ax.set_xlabel('Humedad (%)')
-                ax.set_ylabel('Frecuencia')
-                st.pyplot(fig)
-
+       
     except Exception as e:
         st.error(f'Error al procesar el archivo: {str(e)}')
 else:
