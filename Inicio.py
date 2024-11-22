@@ -26,8 +26,7 @@ st.markdown("""
 # Title and description
 st.title('📊 SENSOREAFIT')
 st.markdown("""
-    Esta aplicación permite analizar datos de temperatura y humedad
-    recolectados por sensores de temperatura y humedad en diferentes puntos de la ciudad.
+   Con esta aplicacion podemos analizar datos de humedad y temperatura en la universidad EAFIT
 """)
 
 # Create map data for EAFIT
