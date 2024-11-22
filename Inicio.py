@@ -59,7 +59,7 @@ if uploaded_file is not None:
         df1 = df1.set_index('Time')
 
         # Create tabs for different analyses
-        tab1, tab2, tab3, tab4, tab5 = st.tabs(["📈 Visualización", "📊 Estadísticas de Datos", "🔍 Filtros", "🗺️ Ubicación"])
+        tab1, tab2, tab3, tab4 = st.tabs(["📈 Visualización", "📊 Estadísticas de Datos", "🔍 Filtros", "🗺️ Ubicación"])
 
         with tab1:
             st.subheader('Visualización de Datos')
